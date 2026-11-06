@@ -17,17 +17,17 @@
         <section class="metrics-grid">
             <div class="card">
                 <h3>System Status</h3>
-                <p class="metric-value" id="grid-status">Loading...</p>
+                <p class="metric-value" id="grid-status">OPERATIONAL</p>
                 <span class="status optimal">Active Grid</span>
             </div>
             <div class="card">
                 <h3>Average Purity (TDS)</h3>
-                <p class="metric-value" id="avg-tds">-- <span>ppm</span></p>
+                <p class="metric-value" id="avg-tds">142 <span>ppm</span></p>
                 <span class="status optimal">BIS Standard Safe</span>
             </div>
             <div class="card">
                 <h3>Active Pumps</h3>
-                <p class="metric-value" id="active-pumps">--</p>
+                <p class="metric-value" id="active-pumps">18</p>
                 <span class="status optimal">Fully Operational</span>
             </div>
         </section>
@@ -36,49 +36,38 @@
         <section class="status-box">
             <h3>Municipal Zone Live Telemetry</h3>
             <ul id="zone-list">
-                <li>Connecting to Flask Backend... <span class="badge yellow">Loading</span></li>
+                <!-- Dynamically updated by JavaScript simulation -->
             </ul>
         </section>
     </div>
 
-    <!-- JavaScript to fetch data from your Flask backend (app.py) -->
     <script>
-        async function fetchDashboardData() {
-            try {
-                // Fetch System Health
-                const healthRes = await fetch('http://127.0.0.1:5000/api/v1/health');
-                const healthData = await healthRes.json();
+        const zones = ["Rajpur Road", "Clock Tower", "Prem Nagar", "Clement Town"];
+
+        function updateTelemetry() {
+            const zoneList = document.getElementById('zone-list');
+            zoneList.innerHTML = '';
+
+            zones.forEach(zone => {
+                const flow = (Math.random() * (115 - 85) + 85).toFixed(2);
+                const tds = Math.floor(Math.random() * (180 - 110) + 110);
+                const pressureDrop = (Math.random() * (1.8 - 0.1) + 0.1).toFixed(2);
                 
-                document.getElementById('grid-status').innerText = healthData.grid_status;
-                document.getElementById('avg-tds').innerHTML = `${healthData.average_tds} <span>ppm</span>`;
-                document.getElementById('active-pumps').innerText = healthData.total_pumps;
+                const isLeak = pressureDrop > 1.2;
+                const status = isLeak ? "LEAK DETECTED" : "OPTIMAL";
+                const badgeClass = isLeak ? "yellow" : "green";
 
-                // Fetch Live Zone Telemetry
-                const telemetryRes = await fetch('http://127.0.0.1:5000/api/v1/telemetry');
-                const telemetryData = await telemetryRes.json();
-
-                const zoneList = document.getElementById('zone-list');
-                zoneList.innerHTML = ''; // Clear loading text
-
-                telemetryData.data.forEach(zone => {
-                    const li = document.createElement('li');
-                    const badgeClass = zone.status === 'OPTIMAL' ? 'green' : 'yellow';
-                    
-                    li.innerHTML = `
-                        ${zone.zone} (Flow: ${zone.flow_rate_lps} L/s, TDS: ${zone.tds_ppm} ppm) 
-                        <span class="badge ${badgeClass}">${zone.status}</span>
-                    `;
-                    zoneList.appendChild(li);
-                });
-            } catch (error) {
-                console.error("Error connecting to backend:", error);
-                document.getElementById('zone-list').innerHTML = `<li>Failed to connect to backend server. Make sure <strong>app.py</strong> is running. <span class="badge yellow">Offline</span></li>`;
-            }
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${zone} (Flow: ${flow} L/s, TDS: ${tds} ppm) 
+                    <span class="badge ${badgeClass}">${status}</span>
+                `;
+                zoneList.appendChild(li);
+            });
         }
 
-        // Fetch data immediately on load, then every 5 seconds
-        fetchDashboardData();
-        setInterval(fetchDashboardData, 5000);
+        updateTelemetry();
+        setInterval(updateTelemetry, 4000); // Live updates every 4 seconds
     </script>
 </body>
 </html>
