@@ -6,8 +6,10 @@ Framework: Flask
 
 import random
 from flask import Flask, jsonify
+from flask_cors import CORS  # <--- Added CORS import
 
 app = Flask(__name__)
+CORS(app)  # <--- Enabled CORS for all routes
 
 # Dehradun Municipal Zones
 ZONES = ["Rajpur Road", "Clock Tower", "Prem Nagar", "Clement Town"]
